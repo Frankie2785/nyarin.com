@@ -25,13 +25,29 @@
         .image {
             width: 200px; /* Adjust size as needed */
             height: auto;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title">Nyarin Counter</div>
-        <img src="nyarin.png" alt="Nyarin" class="image">
+        <div class="title" id="counter">Nyarin Counter: 0</div>
+        <img src="nyarin.png" alt="Nyarin" class="image" id="nyarinImage">
+        <audio id="nyarinSound" src="nyarin.mp3"></audio>
     </div>
+
+    <script>
+        let counter = 0;
+        const counterElement = document.getElementById('counter');
+        const nyarinImage = document.getElementById('nyarinImage');
+        const nyarinSound = document.getElementById('nyarinSound');
+
+        nyarinImage.addEventListener('click', () => {
+            counter++;
+            counterElement.textContent = `Nyarin Counter: ${counter}`;
+            nyarinSound.currentTime = 0; // Reset the audio to the start
+            nyarinSound.play();
+        });
+    </script>
 </body>
 </html>
