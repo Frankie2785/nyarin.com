@@ -36,16 +36,41 @@
         <audio id="nyarinSound" src="nyarin.mp3"></audio>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-database.js"></script>
     <script>
-        let counter = 0;
+        // Firebase 初始化
+        const firebaseConfig = {
+            apiKey: "AIzaSyDcCCRQnjdIV-Z77hs216cMWgjtYRM-f9w",
+            authDomain: "nyarin-4b795.firebaseapp.com",
+            databaseURL: "https://nyarin-4b795-default-rtdb.firebaseio.com",
+            projectId: "nyarin-4b795",
+            storageBucket: "nyarin-4b795.firebasestorage.app",
+            messagingSenderId: "612444720284",
+            appId: "1:612444720284:web:80319576a1af5ee786b159",
+            measurementId: "G-WBTEBYBDHR"
+          };
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM 元素
         const counterElement = document.getElementById('counter');
         const nyarinImage = document.getElementById('nyarinImage');
         const nyarinSound = document.getElementById('nyarinSound');
 
+        // 監聽數據庫更新
+        const counterRef = database.ref('counter');
+        counterRef.on('value', (snapshot) => {
+            const value = snapshot.val() || 0;
+            counterElement.textContent = `Nyarin Counter: ${value}`;
+        });
+
+        // 點擊圖片更新數據庫
         nyarinImage.addEventListener('click', () => {
-            counter++;
-            counterElement.textContent = `Nyarin Counter: ${counter}`;
-            nyarinSound.currentTime = 0; // Reset the audio to the start
+            counterRef.transaction((currentValue) => {
+                return (currentValue || 0) + 1;
+            });
+            nyarinSound.currentTime = 0;
             nyarinSound.play();
         });
     </script>
