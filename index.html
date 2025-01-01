@@ -36,15 +36,43 @@
         <audio id="nyarinSound" src="nyarin.mp3"></audio>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
+
     <script>
-        let counter = 0;
+        // Firebase 配置
+        const firebaseConfig = {
+          apiKey: "AIzaSyDcCCRQnjdIV-Z77hs216cMWgjtYRM-f9w",
+          authDomain: "nyarin-4b795.firebaseapp.com",
+          databaseURL: "https://nyarin-4b795-default-rtdb.firebaseio.com",
+          projectId: "nyarin-4b795",
+          storageBucket: "nyarin-4b795.firebasestorage.app",
+          messagingSenderId: "612444720284",
+          appId: "1:612444720284:web:80319576a1af5ee786b159",
+          measurementId: "G-WBTEBYBDHR"
+        };
+
+        // 初始化 Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const counterRef = db.ref('nyarinCounter');
         const counterElement = document.getElementById('counter');
         const nyarinImage = document.getElementById('nyarinImage');
         const nyarinSound = document.getElementById('nyarinSound');
 
-        nyarinImage.addEventListener('click', () => {
-            counter++;
+        // 從 Firebase 讀取初始值
+        counterRef.on('value', (snapshot) => {
+            const counter = snapshot.val() || 0;
             counterElement.textContent = `Nyarin Counter: ${counter}`;
+        });
+
+        // 點擊事件，更新 Firebase 數據
+        nyarinImage.addEventListener('click', () => {
+            counterRef.transaction((currentValue) => {
+                return (currentValue || 0) + 1;
+            });
             nyarinSound.currentTime = 0; // Reset the audio to the start
             nyarinSound.play();
         });
