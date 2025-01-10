@@ -10,6 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column; /* 垂直排列 */
             height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
@@ -17,35 +18,70 @@
         .container {
             text-align: center;
         }
-        .title {
-            font-size: 2rem;
+        .global-number {
+            font-size: 3rem; /* 數字部分更大 */
+            margin-bottom: 0.5rem;
+            color: #000;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        .global-title {
+            font-size: 1.5rem; /* 標題部分較小 */
             margin-bottom: 1rem;
             color: #000;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        .title {
+            font-size: 2rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            color: #000;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
         }
         .image {
-            width: 200px; /* Adjust size as needed */
+            width: 200px; /* 調整圖片大小 */
             height: auto;
             cursor: pointer;
+        }
+        .link {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-family: Arial, sans-serif;
+        }
+        .link a {
+            color: #0000ff; /* 藍色超連結 */
+            text-decoration: none; /* 移除底線 */
+        }
+        .link a:hover {
+            text-decoration: underline; /* 滑鼠懸停時顯示底線 */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title" id="counter">Nyarin Counter: 0</div>
+        <div class="global-number" id="globalCounterNumber">0</div>
+        <div class="global-title">Nyarin Global Counter</div>
         <img src="nyarin.png" alt="Nyarin" class="image" id="nyarinImage">
+        <div class="title" id="counter">Nyarin Counter: 0</div>
         <audio id="nyarinSound" src="nyarin.mp3"></audio>
+        <div class="link">
+            <a href="https://www.youtube.com/@narinmikure" target="_blank">Narin Mikure【VSPO! EN】</a>
+        </div>
     </div>
 
     <script>
-        let counter = 0;
+        let globalCounter = 0; // 全域計數器
+        let counter = 0; // 本地計數器
+        const globalCounterNumberElement = document.getElementById('globalCounterNumber');
         const counterElement = document.getElementById('counter');
         const nyarinImage = document.getElementById('nyarinImage');
         const nyarinSound = document.getElementById('nyarinSound');
 
         nyarinImage.addEventListener('click', () => {
+            globalCounter++;
             counter++;
+            globalCounterNumberElement.textContent = globalCounter; // 更新數字
             counterElement.textContent = `Nyarin Counter: ${counter}`;
-            nyarinSound.currentTime = 0; // Reset the audio to the start
+            nyarinSound.currentTime = 0; // 重置音效到起點
             nyarinSound.play();
         });
     </script>
