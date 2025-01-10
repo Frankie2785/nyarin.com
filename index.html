@@ -10,7 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column; /* 垂直排列 */
+            flex-direction: column;
             height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
@@ -19,13 +19,13 @@
             text-align: center;
         }
         .global-number {
-            font-size: 3rem; /* 數字部分更大 */
+            font-size: 3rem;
             margin-bottom: 0.5rem;
             color: #000;
             font-family: 'Comic Sans MS', cursive, sans-serif;
         }
         .global-title {
-            font-size: 1.5rem; /* 標題部分較小 */
+            font-size: 1.5rem;
             margin-bottom: 1rem;
             color: #000;
             font-family: 'Comic Sans MS', cursive, sans-serif;
@@ -38,9 +38,13 @@
             font-family: 'Comic Sans MS', cursive, sans-serif;
         }
         .image {
-            width: 200px; /* 調整圖片大小 */
+            width: 200px;
             height: auto;
             cursor: pointer;
+        }
+        .image:active {
+            transform: scale(1.1); /* 點擊時放大效果 */
+            transition: transform 0.2s ease;
         }
         .link {
             margin-top: 1rem;
@@ -48,18 +52,18 @@
             font-family: Arial, sans-serif;
         }
         .link a {
-            color: #0000ff; /* 藍色超連結 */
-            text-decoration: none; /* 移除底線 */
+            color: #0000ff;
+            text-decoration: none;
         }
         .link a:hover {
-            text-decoration: underline; /* 滑鼠懸停時顯示底線 */
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="global-number" id="globalCounterNumber">0</div>
-        <div class="global-title">Nyarin Global Counter(not global yet :3</div>
+        <div class="global-number" id="globalCounterNumber">Loading...</div>
+        <div class="global-title">Global Nyarin Counter</div>
         <img src="nyarin.png" alt="Nyarin" class="image" id="nyarinImage">
         <div class="title" id="counter">Nyarin Counter: 0</div>
         <audio id="nyarinSound" src="nyarin.mp3"></audio>
@@ -69,21 +73,66 @@
     </div>
 
     <script>
-        let globalCounter = 0; // 全域計數器
-        let counter = 0; // 本地計數器
+        let localCounter = 0; // 本地計數器
+        let unsyncedClicks = 0; // 尚未同步到全局計數器的點擊數
         const globalCounterNumberElement = document.getElementById('globalCounterNumber');
         const counterElement = document.getElementById('counter');
         const nyarinImage = document.getElementById('nyarinImage');
         const nyarinSound = document.getElementById('nyarinSound');
 
+        const googleSheetsAPI = 'https://script.google.com/macros/s/AKfycbyWHpDh-TxioEFWMdGhogH9-EWj3sN-lAq-nnBwRQCGZB76IdQXtE9rzOZ2sXKwMOsszQ/exec'; // 替換為您的 URL
+
+        // 初始化全局計數器值
+        function initializeGlobalCounter() {
+            fetch(googleSheetsAPI)
+                .then(response => response.json())
+                .then(data => {
+                    globalCounterNumberElement.textContent = data.counter;
+                })
+                .catch(error => {
+                    console.error('Error fetching global counter:', error);
+                    globalCounterNumberElement.textContent = 'Error';
+                });
+        }
+
+        // 本地點擊事件
         nyarinImage.addEventListener('click', () => {
-            globalCounter++;
-            counter++;
-            globalCounterNumberElement.textContent = globalCounter; // 更新數字
-            counterElement.textContent = `Nyarin Counter: ${counter}`;
+            localCounter++;
+            unsyncedClicks++; // 增加未同步點擊數
+            counterElement.textContent = `Nyarin Counter: ${localCounter}`;
             nyarinSound.currentTime = 0; // 重置音效到起點
             nyarinSound.play();
         });
+
+        // 每 10 秒同步本地新增點擊數到全局計數器
+        setInterval(() => {
+            if (unsyncedClicks > 0) {
+                fetch(`${googleSheetsAPI}?increment=${unsyncedClicks}`, {
+                    method: 'POST',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    globalCounterNumberElement.textContent = data.counter;
+                    unsyncedClicks = 0; // 重置未同步點擊數
+                })
+                .catch(error => {
+                    console.error('Error updating global counter:', error);
+                });
+            }
+        }, 5000);
+
+        // 每 10 秒獲取最新的全局計數器值
+        setInterval(() => {
+            fetch(googleSheetsAPI)
+                .then(response => response.json())
+                .then(data => {
+                    globalCounterNumberElement.textContent = data.counter;
+                })
+                .catch(error => console.error('Error fetching global counter:', error));
+        }, 10000);
+
+        // 初始化頁面時加載全局計數器
+        initializeGlobalCounter();
     </script>
 </body>
 </html>
