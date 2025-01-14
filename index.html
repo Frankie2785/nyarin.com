@@ -76,7 +76,7 @@
         <div class="global-title">Global Nyarin Counter</div>
         <img src="nyarin.png" alt="Nyarin" class="image" id="nyarinImage">
         <div class="title" id="counter">Nyarin Counter: 0</div>
-        <audio id="nyarinSound" src="nyarin1.mp3"></audio>
+        <audio id="nyarinSound" src="nyarin.mp3"></audio>
         <div class="link">
             <a href="https://www.youtube.com/@narinmikure" target="_blank">Narin Mikure【VSPO! EN】</a>
         </div>
@@ -84,65 +84,62 @@
 
     <script>
         let localCounter = 0; // 本地計數器
-        let unsyncedClicks = 0; // 尚未同步到全局計數器的點擊數
+        let unsyncedClicks = 0; // 尚未同步的點擊數
+        let globalCounter = 0; // 頁面上的全局計數器
         const globalCounterNumberElement = document.getElementById('globalCounterNumber');
         const counterElement = document.getElementById('counter');
         const nyarinImage = document.getElementById('nyarinImage');
-        const nyarinSound = document.getElementById('nyarinSound');
-
+    
         const googleSheetsAPI = 'https://script.google.com/macros/s/AKfycbyWHpDh-TxioEFWMdGhogH9-EWj3sN-lAq-nnBwRQCGZB76IdQXtE9rzOZ2sXKwMOsszQ/exec'; // 替換為您的 URL
-
+    
         // 初始化全局計數器值
         function initializeGlobalCounter() {
             fetch(googleSheetsAPI)
                 .then(response => response.json())
                 .then(data => {
-                    globalCounterNumberElement.textContent = data.counter;
+                    globalCounter = data.counter; // 設置全局計數器初始值
+                    globalCounterNumberElement.textContent = globalCounter;
                 })
                 .catch(error => {
                     console.error('Error fetching global counter:', error);
                     globalCounterNumberElement.textContent = 'Error';
                 });
         }
-
-        // 本地點擊事件
+    
+        // 點擊事件
         nyarinImage.addEventListener('click', () => {
             localCounter++;
-            unsyncedClicks++; // 增加未同步點擊數
+            unsyncedClicks++; // 增加未同步的點擊數
+            globalCounter++; // 即時更新頁面上的全局計數器
             counterElement.textContent = `Nyarin Counter: ${localCounter}`;
-            nyarinSound.currentTime = 0; // 重置音效到起點
+            globalCounterNumberElement.textContent = globalCounter;
+    
+            // 播放音效
+            const nyarinSound = new Audio('nyarin.mp3');
             nyarinSound.play();
         });
-
-        // 每 10 秒同步本地新增點擊數到全局計數器
+    
+        // 每 5 秒同步本地點擊增量到全局計數器
         setInterval(() => {
+            syncedClicks = unsyncedClicks;
             if (unsyncedClicks > 0) {
                 fetch(`${googleSheetsAPI}?increment=${unsyncedClicks}`, {
                     method: 'POST',
                 })
                 .then(response => response.json())
                 .then(data => {
-                    globalCounterNumberElement.textContent = data.counter;
-                    unsyncedClicks = 0; // 重置未同步點擊數
+                    data.counter += syncedClicks; // 更新全局計數器值
+                    globalCounterNumberElement.textContent = globalCounter;
+                    unsyncedClicks -= syncedClicks; // 重置未同步的點擊數
                 })
                 .catch(error => {
                     console.error('Error updating global counter:', error);
                 });
             }
         }, 5000);
-
-        // 每 10 秒獲取最新的全局計數器值
-        setInterval(() => {
-            fetch(googleSheetsAPI)
-                .then(response => response.json())
-                .then(data => {
-                    globalCounterNumberElement.textContent = data.counter;
-                })
-                .catch(error => console.error('Error fetching global counter:', error));
-        }, 6000);
-
+    
         // 初始化頁面時加載全局計數器
         initializeGlobalCounter();
-    </script>
+    </script> 
 </body>
 </html>
