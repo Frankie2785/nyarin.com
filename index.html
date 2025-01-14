@@ -47,13 +47,18 @@
             font-weight: 700;
         }
         .image {
-            width: 200px;
-            height: auto;
-            cursor: pointer;
+        width: 200px;
+        height: auto;
+        cursor: pointer;
+        outline: none; /* 禁用點擊圖片時的藍色懸浮框 */
         }
         .image:active {
             transform: scale(1.1); /* 點擊時放大效果 */
             transition: transform 0.2s ease;
+        }
+        .image:focus {
+            outline: none; /* 確保圖片獲得焦點時也不會有外框 */
+        }
         }
         .link {
             margin-top: 1rem;
@@ -136,7 +141,7 @@
                     console.error('Error updating global counter:', error);
                 });
             }
-        }, 5000);
+        }, 3000);
     
         // 初始化頁面時加載全局計數器
         initializeGlobalCounter();
